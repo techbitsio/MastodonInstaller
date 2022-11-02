@@ -157,6 +157,8 @@ sudo -u postgres psql -c "CREATE USER mastodon CREATEDB;"
 
 ## Create ruby installer in mastodon user home dir, then run.
 ## Note: bash -i shebang throws an error, but the interactivity is required
+## "bash: cannot set terminal process group (-1): Inappropriate ioctl for device"
+## "bash: no job control in this shell"
 echo '#!/bin/bash -i' >> /home/mastodon/ruby.sh
 echo 'git clone https://github.com/rbenv/rbenv.git ~/.rbenv' >> /home/mastodon/ruby.sh
 echo 'cd ~/.rbenv && src/configure && make -C src' >> /home/mastodon/ruby.sh
@@ -175,6 +177,8 @@ su -c "/home/mastodon/ruby.sh" - mastodon
 
 ## Create mastodon installer in mastodon user home dir, then run.
 ## Note: bash -i shebang throws an error, but the interactivity is required
+## "bash: cannot set terminal process group (-1): Inappropriate ioctl for device"
+## "bash: no job control in this shell"
 echo '#!/bin/bash -i' >> /home/mastodon/install.sh
 echo 'git clone https://github.com/tootsuite/mastodon.git ~/live && cd live' >> /home/mastodon/install.sh
 echo 'git checkout $(git tag -l | grep -v '\''rc[0-9]*$'\'' | sort -V | tail -n 1)' >> /home/mastodon/install.sh
