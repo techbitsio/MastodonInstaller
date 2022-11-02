@@ -11,7 +11,10 @@ This script follows the [JoinMastodon](https://docs.joinmastodon.org/admin/insta
 ```
 wget https://raw.githubusercontent.com/techbitsio/MastodonInstaller/main/main.sh && chmod +x main.sh
 ```
-
+or
+```
+git clone https://github.com/techbitsio/MastodonInstaller.git && cd MastodonInstaller
+```
 ## Usage
 
 ```
