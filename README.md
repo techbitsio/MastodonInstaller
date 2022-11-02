@@ -1,2 +1,3 @@
-# MastodonInstaller
-Install Mastodon on Ubuntu 20.04/22.04
+# Mastodon Installer for Ubuntu 20.04/22.04
+
+
