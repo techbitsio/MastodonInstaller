@@ -5,6 +5,7 @@ This script follows the [JoinMastodon](https://docs.joinmastodon.org/admin/insta
 ### Assumptions about your server:
 - It's a fresh installation of Ubuntu 20.04 or 22.04
 - You're logged in as root using an SSH key (important because this script will disable password authentication. It will also create a new user for future logins)
+- Encoding is set to UTF-8 (check with `locale`. Change with `update-locale LANG=en_US.UTF-8`, `update-locale LANG=de_DE.UTF-8` etc.) - [#1](https://github.com/techbitsio/MastodonInstaller/issues/1)
 
 ## Download
 
