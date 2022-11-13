@@ -250,6 +250,9 @@ fi
 ## Security hardening
 ## 1. Prevent root login. We've already created a new user account and copied SSH keys over.
 sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/#PermitRootLogin no/PermitRootLogin no/' /etc/ssh/sshd_config
+
 ## 2. Prevent login using password authentication. SSH keys only.
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
