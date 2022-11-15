@@ -2,6 +2,8 @@
 
 This script follows the [JoinMastodon](https://docs.joinmastodon.org/admin/install/) instructions as closely as possible, but deviates where those instructions (currently) don't work.
 
+`15/11/2022 - Bumped Ruby to 3.0.4 and tested installation of Mastodon v4.0.2. Working as expected.`
+
 ### Assumptions about your server:
 - It's a fresh installation of Ubuntu 20.04 or 22.04
 - You're logged in as root using an SSH key (important because this script will disable password authentication. It will also create a new user for future logins)
