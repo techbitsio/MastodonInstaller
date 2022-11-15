@@ -46,3 +46,7 @@ There are certain interactive elements to this script, even if using command lin
 ## Issues & PRs
 
 Issues and PRs welcome for fixes and improvements! Any questions: [@techbitsio](https://twitter.com/techbitsio).
+
+## To Do
+
+Basic testing of procedure against Debian 11 complete. Mostly works. Needed `export NODE_OPTIONS=--max_old_space_size=4096` before `RAILS_ENV=production bundle exec rails assets:precompile`, even with a lot of swap space.
