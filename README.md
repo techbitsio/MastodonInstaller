@@ -46,7 +46,7 @@ There are certain interactive elements to this script, even if using command lin
 
 ## Issues & PRs
 
-Issues and PRs welcome for fixes and improvements! Any questions: [@techbitsio](https://twitter.com/techbitsio).
+Issues and PRs welcome for fixes and improvements! Any questions: [@techbits@sudo.cat](https://sudo.cat/@techbits) or [@techbitsio](https://twitter.com/techbitsio).
 
 ## To Do
 
