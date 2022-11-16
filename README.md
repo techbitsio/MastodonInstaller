@@ -2,8 +2,8 @@
 
 This script follows the [JoinMastodon](https://docs.joinmastodon.org/admin/install/) instructions as closely as possible, but deviates where those instructions (currently) don't work.
 
-16/11/2022 - Added Debian 10/11 support.
-15/11/2022 - Bumped Ruby to 3.0.4 and tested installation of Mastodon v4.0.2. Working as expected.
+- 16/11/2022 - Added Debian 10/11 support.
+- 15/11/2022 - Bumped Ruby to 3.0.4 and tested installation of Mastodon v4.0.2. Working as expected.
 
 ### Assumptions about your server:
 - It's a fresh installation of Ubuntu (20.04 or 22.04) or Debian (10 or 11)
