@@ -1,7 +1,6 @@
 #!/bin/bash
 
 staging=false
-ur=$(cat /etc/lsb-release | grep DISTRIB_RELEASE | sed 's/DISTRIB_RELEASE=//')
 
 user_check() {
 	if [ "$username" == "mastodon" ]; then
@@ -10,6 +9,9 @@ user_check() {
           exit 1
 	fi
 }
+
+## Check if rsync is installed. Install if required (Debian 10/11 - not installed by default?)
+type -p rsync >/dev/null || apt-get install rsync -y
 
 while getopts ":e:d:u:s" flag; do
     case ${flag} in
@@ -47,16 +49,28 @@ if [ -z "$email" ]; then
     read email
 fi
 
+if [ $(awk -F= '/^ID=/{print $2}' /etc/os-release) == "debian" ]; then
+    # Debian Specific Tasks
+    echo ' ' >/dev/null
+fi
+
+# This is messy. There's another check for Ubuntu 22.04 at the end, but still... find a better way.
+ur=0
+if [ $(awk -F= '/^ID=/{print $2}' /etc/os-release) == "ubuntu" ]; then
+    ur=$(cat /etc/lsb-release | grep DISTRIB_RELEASE | sed 's/DISTRIB_RELEASE=//')
+fi
+
 if [ "$ur" = "22.04" ]; then
     sed -i 's/#$nrconf{kernelhints} = -1;/$nrconf{kernelhints} = 0;/' /etc/needrestart/needrestart.conf
     sed -i 's/#$nrconf{restart} = '\''i'\'';/$nrconf{restart} = '\''a'\'';/' /etc/needrestart/needrestart.conf
     sed -i 's/#$nrconf{ucodehints} = 0;/$nrconf{ucodehints} = 0;/' /etc/needrestart/needrestart.conf
-    
+
     snap install core
     snap refresh core
     snap install --classic certbot
     ln -s /snap/bin/certbot /usr/bin/certbot
 fi
+
 
 apt-get update
 
