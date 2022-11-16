@@ -1,11 +1,12 @@
-# Mastodon Installer for Ubuntu 20.04/22.04
+# Mastodon Installer for Ubuntu 20.04/22.04 & Debian 10/11
 
 This script follows the [JoinMastodon](https://docs.joinmastodon.org/admin/install/) instructions as closely as possible, but deviates where those instructions (currently) don't work.
 
-`15/11/2022 - Bumped Ruby to 3.0.4 and tested installation of Mastodon v4.0.2. Working as expected.`
+16/11/2022 - Added Debian 10/11 support.
+15/11/2022 - Bumped Ruby to 3.0.4 and tested installation of Mastodon v4.0.2. Working as expected.
 
 ### Assumptions about your server:
-- It's a fresh installation of Ubuntu 20.04 or 22.04
+- It's a fresh installation of Ubuntu (20.04 or 22.04) or Debian (10 or 11)
 - You're logged in as root using an SSH key (important because this script will disable password authentication. It will also create a new user for future logins)
 - Encoding is set to UTF-8 (check with `locale`. Change with `update-locale LANG=en_US.UTF-8`, `update-locale LANG=de_DE.UTF-8` etc.) - [#1](https://github.com/techbitsio/MastodonInstaller/issues/1)
 
