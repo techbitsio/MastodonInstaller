@@ -249,7 +249,7 @@ if $https; then
         echo 'dns_cloudflare_api_token = '$cloudflare_token >> $cf_ini_dir/cloudflare-$domain.ini
         chmod 600 $cf_ini_dir/cloudflare-$domain.ini
         
-        if $staging
+        if $staging; then
             certbot certonly --staging --dns-cloudflare --dns-cloudflare-credentials $cf_ini_dir/cloudflare-$domain.ini --dns-cloudflare-propagation-seconds 30 -d $domain --non-interactive --agree-tos -m $email
         else
             certbot certonly --dns-cloudflare --dns-cloudflare-credentials $cf_ini_dir/cloudflare-$domain.ini --dns-cloudflare-propagation-seconds 30 -d $domain --non-interactive --agree-tos -m $email
@@ -259,8 +259,7 @@ if $https; then
     else
         systemctl stop nginx
 
-        if $staging
-        then 
+        if $staging; then 
             certbot certonly --staging --standalone -d $domain --non-interactive --agree-tos -m $email
         else 
             certbot certonly --standalone -d $domain --non-interactive --agree-tos -m $email
