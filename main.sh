@@ -255,6 +255,8 @@ if $https; then
             certbot certonly --dns-cloudflare --dns-cloudflare-credentials $cf_ini_dir/cloudflare-$domain.ini --dns-cloudflare-propagation-seconds 30 -d $domain --non-interactive --agree-tos -m $email
         fi
 
+        systemctl restart nginx
+
     ## using 'standalone' certbot method. We have to take Nginx down so certbot can server on port 80 for challenge request. Renewals have to also stop/start Nginx.
     else
         systemctl stop nginx
