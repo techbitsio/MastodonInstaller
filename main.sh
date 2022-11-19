@@ -60,7 +60,7 @@ if [ -z "$email" ]; then
 fi
 
 if [ $(awk -F= '/^ID=/{print $2}' /etc/os-release) == "debian" ]; then
-    apt install snapd
+    apt install snapd -y
 fi
 
 # This is messy. There's another check for Ubuntu 22.04 at the end, but still... find a better way.
