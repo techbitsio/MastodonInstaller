@@ -1,6 +1,7 @@
 #!/bin/bash
 
 staging=false
+cf=false
 
 user_check() {
 	if [ "$username" == "mastodon" ]; then
@@ -13,16 +14,19 @@ user_check() {
 ## Check if rsync is installed. Install if required (Debian 10/11 - not installed by default?)
 type -p rsync >/dev/null || apt-get install rsync -y
 
-while getopts ":e:d:u:s" flag; do
+while getopts ":c:e:d:u:s" flag; do
     case ${flag} in
+        c  ) cloudflare_token=${OPTARG}
+             cf=true
+             ;;
         e  ) email=${OPTARG}    
              ;;
-	d  ) domain=${OPTARG}
-	     ;;
+	    d  ) domain=${OPTARG}
+	         ;;
      	u  ) username=${OPTARG}
-	     user_check
-	     ;;
-	s  ) staging=true
+	         user_check
+	         ;;
+	    s  ) staging=true
              ;;
     esac
 done
@@ -39,6 +43,12 @@ adduser --gecos "" $username
 usermod -aG sudo $username
 rsync --archive --chown=$username:$username ~/.ssh /home/$username
 
+if [ -z "$cloudflare_token" ]; then
+	echo "Cloudflare token not provided."
+else
+    echo "Cloudflare token provided."
+fi
+
 if [ -z "$domain" ]; then
 	echo "Domain (e.g. domain.com or sub.domain.com) ="
 	read domain
@@ -50,8 +60,7 @@ if [ -z "$email" ]; then
 fi
 
 if [ $(awk -F= '/^ID=/{print $2}' /etc/os-release) == "debian" ]; then
-    # Debian Specific Tasks
-    echo ' ' >/dev/null
+    apt install snapd
 fi
 
 # This is messy. There's another check for Ubuntu 22.04 at the end, but still... find a better way.
@@ -64,11 +73,16 @@ if [ "$ur" = "22.04" ]; then
     sed -i 's/#$nrconf{kernelhints} = -1;/$nrconf{kernelhints} = 0;/' /etc/needrestart/needrestart.conf
     sed -i 's/#$nrconf{restart} = '\''i'\'';/$nrconf{restart} = '\''a'\'';/' /etc/needrestart/needrestart.conf
     sed -i 's/#$nrconf{ucodehints} = 0;/$nrconf{ucodehints} = 0;/' /etc/needrestart/needrestart.conf
+fi
 
-    snap install core
-    snap refresh core
-    snap install --classic certbot
-    ln -s /snap/bin/certbot /usr/bin/certbot
+# Install certbot - changed method for all Debian and Ubuntu versions as certbot cloudflare DNS plugin is installed from snap
+snap install core
+snap refresh core
+snap install --classic certbot
+ln -s /snap/bin/certbot /usr/bin/certbot
+if $cf; then
+    snap set certbot trust-plugin-with-root=ok
+    snap install certbot-dns-cloudflare
 fi
 
 
@@ -159,7 +173,7 @@ apt-get install -y \
   bison build-essential libssl-dev libyaml-dev libreadline6-dev \
   zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev \
   nginx redis-server redis-tools postgresql postgresql-contrib \
-  certbot python3-certbot-nginx libidn11-dev libicu-dev libjemalloc-dev
+  libidn11-dev libicu-dev libjemalloc-dev
 
 corepack enable
 yarn set version stable
@@ -220,25 +234,42 @@ sed -i "s,# ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;,s
 ## replace remaining instances of example.com in 80/443 blocks of config file
 sed -i "s/example.com/$domain/" /etc/nginx/sites-available/mastodon
 
-systemctl stop nginx
+## certbot if using cloudflare API token. Renewal scheduling is automatic because we don't have to use 'standalone'
+if $cf; then
+    cf_ini_dir=~/.secrets/certbot
+    mkdir -p $cf_ini_dir
+    echo '# Cloudflare API token used by Certbot' >> $cf_ini_dir/cloudflare-$domain.ini
+    echo 'dns_cloudflare_api_token = '$cloudflare_token >> $cf_ini_dir/cloudflare-$domain.ini
+    chmod 600 $cf_ini_dir/cloudflare-$domain.ini
+    
+    if $staging
+        certbot certonly --staging --dns-cloudflare --dns-cloudflare-credentials $cf_ini_dir/cloudflare-$domain.ini --dns-cloudflare-propagation-seconds 30 -d $domain --non-interactive --agree-tos -m $email
+    else
+        certbot certonly --dns-cloudflare --dns-cloudflare-credentials $cf_ini_dir/cloudflare-$domain.ini --dns-cloudflare-propagation-seconds 30 -d $domain --non-interactive --agree-tos -m $email
+    fi
 
-if $staging
-then 
-	certbot certonly --staging --standalone -d $domain --non-interactive --agree-tos -m $email
-else 
-	certbot certonly --standalone -d $domain --non-interactive --agree-tos -m $email
+## using 'standalone' certbot method. We have to take Nginx down so certbot can server on port 80 for challenge request. Renewals have to also stop/start Nginx.
+else
+    systemctl stop nginx
+
+    if $staging
+    then 
+        certbot certonly --staging --standalone -d $domain --non-interactive --agree-tos -m $email
+    else 
+        certbot certonly --standalone -d $domain --non-interactive --agree-tos -m $email
+    fi
+
+    systemctl start nginx
+
+    ## Certbot renewal
+    ## Very useful: https://eff-certbot.readthedocs.io/en/stable/using.html#automated-renewals
+    sudo sh -c 'printf "#!/bin/sh\nservice nginx stop\n" > /etc/letsencrypt/renewal-hooks/pre/nginx.sh'
+    sudo sh -c 'printf "#!/bin/sh\nservice nginx start\n" > /etc/letsencrypt/renewal-hooks/post/nginx.sh'
+    sudo chmod 755 /etc/letsencrypt/renewal-hooks/pre/nginx.sh
+    sudo chmod 755 /etc/letsencrypt/renewal-hooks/post/nginx.sh
+
+    SLEEPTIME=$(awk 'BEGIN{srand(); print int(rand()*(3600+1))}'); echo "0 0,12 * * * root sleep $SLEEPTIME && certbot renew -q" | tee -a /etc/crontab > /dev/null
 fi
-
-systemctl start nginx
-
-## Certbot renewal
-## Very useful: https://eff-certbot.readthedocs.io/en/stable/using.html#automated-renewals
-sudo sh -c 'printf "#!/bin/sh\nservice nginx stop\n" > /etc/letsencrypt/renewal-hooks/pre/nginx.sh'
-sudo sh -c 'printf "#!/bin/sh\nservice nginx start\n" > /etc/letsencrypt/renewal-hooks/post/nginx.sh'
-sudo chmod 755 /etc/letsencrypt/renewal-hooks/pre/nginx.sh
-sudo chmod 755 /etc/letsencrypt/renewal-hooks/post/nginx.sh
-
-SLEEPTIME=$(awk 'BEGIN{srand(); print int(rand()*(3600+1))}'); echo "0 0,12 * * * root sleep $SLEEPTIME && certbot renew -q" | tee -a /etc/crontab > /dev/null
 
 ## Copy, reload and enable mastodon services
 cp /home/mastodon/live/dist/mastodon-*.service /etc/systemd/system/
