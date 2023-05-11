@@ -180,8 +180,8 @@ echo 'echo '\''export PATH="$HOME/.rbenv/bin:$PATH"'\'' >> ~/.bashrc' >> /home/m
 echo 'echo '\''eval "$(rbenv init -)"'\'' >> ~/.bashrc' >> /home/mastodon/ruby.sh
 echo 'source ~/.bashrc' >> /home/mastodon/ruby.sh
 echo 'git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build' >> /home/mastodon/ruby.sh
-echo 'RUBY_CONFIGURE_OPTS=--with-jemalloc rbenv install 3.0.4' >> /home/mastodon/ruby.sh
-echo 'rbenv global 3.0.4' >> /home/mastodon/ruby.sh
+echo 'RUBY_CONFIGURE_OPTS=--with-jemalloc rbenv install 3.0.6' >> /home/mastodon/ruby.sh
+echo 'rbenv global 3.0.6' >> /home/mastodon/ruby.sh
 echo 'gem install bundler --no-document' >> /home/mastodon/ruby.sh
 
 chmod +x /home/mastodon/ruby.sh
